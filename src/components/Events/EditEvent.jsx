@@ -1,6 +1,6 @@
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { useQuery, useMutation, queryClient } from '@tanstack/react-query';
-import { fetchEvent, updateEvent } from '../../util/http.js';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { fetchEvent, updateEvent, queryClient } from '../../util/http.js';
 
 import Modal from '../UI/Modal.jsx';
 import EventForm from './EventForm.jsx';
