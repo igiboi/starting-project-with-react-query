@@ -1,5 +1,5 @@
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, queryClient } from '@tanstack/react-query';
 import { fetchEvent, updateEvent } from '../../util/http.js';
 
 import Modal from '../UI/Modal.jsx';
@@ -18,13 +18,27 @@ export default function EditEvent() {
   
   const { mutate } = useMutation({
     mutationFn: updateEvent,
-    onSuccess: () => {
-      navigate('../');
-    },
+    onMutate: async (data) => {
+      const newEvent = data.event;
+
+      await queryClient.cancelQueries({ queryKey: ['events', params.id] });
+      const previousEvent = queryClient.getQueryData({ queryKey: ['events', params.id] });
+      
+      queryClient.setQueryData(['events', params.id], newEvent);
+
+      return { previousEvent };
+    }, 
+    onError: (error, data, context) => {
+      queryClient.setQueryData(['events', params.id], context.previousEvent);
+    }, 
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['events', params.id] });
+    }
   });
 
   function handleSubmit(formData) {
     mutate({ id: params.id, event: formData });
+      navigate('../');
   }
 
   function handleClose() {
